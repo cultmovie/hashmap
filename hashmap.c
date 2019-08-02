@@ -19,6 +19,7 @@ void free_hashmap(HashMap *m){
             p = p->next;
             free(tmp);
         }
+        m->slots[i] = NULL;
     }
     free(m->slots);
     free(m);
@@ -155,7 +156,7 @@ void main(){
     for(int i=0;i<120;i++)
         add_hash(m, i, (void *)&flag);
     dump_hashmap(m);
-    for(int i=0;i<110;i++)
+    for(int i=0;i<120;i++)
         remove_hash(m, i);
     dump_hashmap(m);
 
