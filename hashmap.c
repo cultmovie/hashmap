@@ -1,7 +1,7 @@
 #include "hashmap.h"
 
 HashMap *new_hashmap(){
-    HashMap *m = (HashMap *)malloc(sizeof(m));
+    HashMap *m = (HashMap *)malloc(sizeof(HashMap));
     m->slots = (Slot **)calloc(INIT_SIZE, sizeof(Slot *));
     m->count = 0;
     m->slots_size = INIT_SIZE;
