@@ -90,7 +90,7 @@ void *query_hash(HashMap *m, KEY_TYPE key){
     return NULL;
 }
 
-bool remove_hash(HashMap *m, KEY_TYPE key){
+void *remove_hash(HashMap *m, KEY_TYPE key){
     int h = HASH(key, m->slots_size);
     Slot *p = m->slots[h];
     Slot *prior = NULL;
@@ -104,7 +104,8 @@ bool remove_hash(HashMap *m, KEY_TYPE key){
         p = p->next;
     }
     if(!is_find)
-        return false;
+        return NULL;
+    void *value = p->value;
     if(prior){
         prior->next = p->next;
         free(p);
@@ -118,7 +119,7 @@ bool remove_hash(HashMap *m, KEY_TYPE key){
     m->count--;
     if(m->count < m->slots_size / 4)
         rehash(m, m->slots_size / 2);
-    return true;
+    return value;
 }
 
 void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra){
