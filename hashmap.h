@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <time.h>
 
 #define INIT_SIZE 2
 #define cast(t, exp)    ((t)(exp))

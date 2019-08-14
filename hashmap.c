@@ -154,22 +154,14 @@ static char flag = 1;
 
 void main(){
     HashMap *m = new_hashmap();   
-    for(int i=0;i<120;i++)
+    srand((unsigned int)time(NULL));
+    int num1 = rand() % 1000;
+    for(int i=0;i<num1;i++)
         add_hash(m, i, (void *)&flag);
-    dump_hashmap(m);
-    for(int i=0;i<120;i++)
+    //dump_hashmap(m);
+    int num2 = rand() % 100;
+    for(int i=0;i<num2;i++)
         remove_hash(m, i);
-    dump_hashmap(m);
-
-    /*
-    add_hash(m, 100, (void *)&flag);   
-    dump_hashmap(m);
-    add_hash(m, 101, (void *)&flag);   
-    dump_hashmap(m);
-    add_hash(m, 102, (void *)&flag);   
-    dump_hashmap(m);
-    add_hash(m, 103, (void *)&flag);   
-    dump_hashmap(m);
-    add_hash(m, 104, (void *)&flag);   
-    dump_hashmap(m);*/
+    //dump_hashmap(m);
+    free_hashmap(m);
 }
