@@ -27,30 +27,29 @@ void free_hashmap(HashMap *m){
 
 static void _add_hash(Slot **slots, int slot_size, int *count, KEY_TYPE key, void *value){
     int h = HASH(key, slot_size);
-    Slot *p = slots[h];
-    if(p == NULL) {
-        p = (Slot *)malloc(sizeof(Slot));
-        p->key = key;
-        p->value = value;
-        p->next = NULL;
-        slots[h] = p;
+    Slot *head = slots[h];
+    if(head == NULL) {
+        head = (Slot *)malloc(sizeof(Slot));
+        head->key = key;
+        head->value = value;
+        head->next = NULL;
+        slots[h] = head;
         if(count) (*count)++;
         return;
     }
-    Slot *tail = NULL;
+    Slot *p = slots[h];
     while(p){
         if(p->key == key){
             p->value = value;
             return;
         }
-        tail = p;
         p = p->next;
     }
-    p = (Slot *)malloc(sizeof(Slot));
-    p->key = key;
-    p->value = value;
-    p->next = NULL;
-    tail->next = p;
+    Slot *new_slot = (Slot *)malloc(sizeof(Slot));
+    new_slot->key = key;
+    new_slot->value = value;
+    slots[h] = new_slot;
+    new_slot->next = head;
     if(count) (*count)++;
 }
 
