@@ -73,7 +73,7 @@ static void rehash(HashMap *m, int new_size){
 }
 
 void add_hash(HashMap *m, KEY_TYPE key, void *value){
-    if(m->count >= m->slots_size && m->slots_size <= INT_MAX){
+    if(m->count >= m->slots_size && m->slots_size <= INT_MAX/2){
         rehash(m, m->slots_size * 2);
     }
     _add_hash(m->slots, m->slots_size, &m->count, key, value);
