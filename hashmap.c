@@ -25,7 +25,7 @@ void free_hashmap(HashMap *m){
     free(m);
 }
 
-static void _add_hash(Slot **slots, int slot_size, int *count, KEY_TYPE key, void *value){
+static void *_add_hash(Slot **slots, int slot_size, int *count, KEY_TYPE key, void *value){
     int h = HASH(key, slot_size);
     Slot *head = slots[h];
     if(head == NULL) {
@@ -35,13 +35,14 @@ static void _add_hash(Slot **slots, int slot_size, int *count, KEY_TYPE key, voi
         head->next = NULL;
         slots[h] = head;
         if(count) (*count)++;
-        return;
+        return NULL;
     }
     Slot *p = slots[h];
     while(p){
         if(p->key == key){
+            void *old = p->value;
             p->value = value;
-            return;
+            return old;
         }
         p = p->next;
     }
@@ -51,6 +52,7 @@ static void _add_hash(Slot **slots, int slot_size, int *count, KEY_TYPE key, voi
     slots[h] = new_slot;
     new_slot->next = head;
     if(count) (*count)++;
+    return NULL;
 }
 
 static void rehash(HashMap *m, int new_size){
@@ -71,11 +73,11 @@ static void rehash(HashMap *m, int new_size){
     m->slots_size = new_size;
 }
 
-void add_hash(HashMap *m, KEY_TYPE key, void *value){
+void *add_hash(HashMap *m, KEY_TYPE key, void *value){
     if(m->count >= m->slots_size && m->slots_size <= INT_MAX/2){
         rehash(m, m->slots_size * 2);
     }
-    _add_hash(m->slots, m->slots_size, &m->count, key, value);
+    return _add_hash(m->slots, m->slots_size, &m->count, key, value);
 }
 
 void *query_hash(HashMap *m, KEY_TYPE key){
