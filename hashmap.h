@@ -2,37 +2,59 @@
 #define _HASHMAP_H
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-#include <time.h>
 
 #define INIT_SIZE 2
 #define cast(t, exp)    ((t)(exp))
-#define KEY_TYPE uint64_t
 #define HASH(key, slots_size) (cast(int, (key) & ((slots_size) - 1)))
 
+#define FAILED 0
+#define SUCC 1
+#define REPLACE 2
+#define ADD 3
+
+#define gen_hash_key(m, key) \
+    (m)->type->hash_function((key))
+
+#define cmp_key(m, key1, key2) \
+    (((m)->type->key_cmp) ? ((m)->type->key_cmp((key1), (key2))) : (key1) == (key2))
+
+#define free_key(m, slot) do { \
+    if((m)->type->key_destructor) \
+        (m)->type->key_destructor((slot)->key); \
+} while(0)
+
+#define free_val(m, slot) do { \
+    if((m)->type->val_destructor) \
+        (m)->type->val_destructor((slot)->value); \
+} while(0)
+
+typedef struct {
+    uint64_t (*hash_function)(const void *key);
+    int (*key_cmp)(const void *key1, const void *key2);
+    void (*key_destructor)(void *key);
+    void (*val_destructor)(void *val);
+} MapType;
+
 typedef struct Slot {
-    KEY_TYPE key;
+    void *key;
     void *value;
     struct Slot *next;
 } Slot;
 
 typedef struct {
+    MapType *type;
     Slot **slots;
     int count;
     int slots_size;
 } HashMap;
 
-typedef void(*traverse_hook)(KEY_TYPE key, void *value, void *extra);
+typedef void(*traverse_hook)(void *key, void *value, void *extra);
 
-HashMap *new_hashmap();
+HashMap *new_hashmap(MapType *type);
 void free_hashmap(HashMap *m);
-void *add_hash(HashMap *m, KEY_TYPE key, void *value);
-void *remove_hash(HashMap *m, KEY_TYPE key);
-void *query_hash(HashMap *m, KEY_TYPE key);
+int add_hash(HashMap *m, void *key, void *value);
+int remove_hash(HashMap *m, void *key);
+void *query_hash(HashMap *m, void *key);
 void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra);
 
 #endif
