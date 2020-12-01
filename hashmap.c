@@ -36,7 +36,38 @@ void free_hashmap(HashMap *m){
     free(m);
 }
 
-static int _add_hash(HashMap *m, Slot **slots, int slot_size, int *count, void *key, void *value){
+static int _add_slot(HashMap *m, Slot **slots, int slot_size, void *key, void *value) {
+    uint64_t hash_key = gen_hash_key(m, key);
+    int h = HASH(hash_key, slot_size);
+    Slot *head = slots[h];
+    if(head == NULL) {
+        head = (Slot *)malloc(sizeof(Slot));
+        copy_key(m, head, key);
+        copy_val(m, head, value);
+        head->next = NULL;
+        slots[h] = head;
+        m->count++;
+        return ADD;
+    }
+    Slot *p = slots[h];
+    while(p){
+        if(key == p->key || cmp_key(m, p->key, key)) {
+            free_val(m, p);
+            copy_val(m, p, value);
+            return REPLACE;
+        }
+        p = p->next;
+    }
+    Slot *new_slot = (Slot *)malloc(sizeof(Slot));
+    copy_key(m, new_slot, key);
+    copy_val(m, new_slot, value);
+    slots[h] = new_slot;
+    new_slot->next = head;
+    m->count++;
+    return ADD;
+}
+
+static void _move_slot(HashMap *m, Slot **slots, int slot_size, void *key, void *value) {
     uint64_t hash_key = gen_hash_key(m, key);
     int h = HASH(hash_key, slot_size);
     Slot *head = slots[h];
@@ -46,25 +77,21 @@ static int _add_hash(HashMap *m, Slot **slots, int slot_size, int *count, void *
         head->value = value;
         head->next = NULL;
         slots[h] = head;
-        if(count) (*count)++;
-        return ADD;
-    }
-    Slot *p = slots[h];
-    while(p){
-        if(key == p->key || cmp_key(m, p->key, key)) {
-            free_val(m, p);
-            p->value = value;
-            return REPLACE;
-        }
-        p = p->next;
+        return;
     }
     Slot *new_slot = (Slot *)malloc(sizeof(Slot));
     new_slot->key = key;
     new_slot->value = value;
-    slots[h] = new_slot;
-    new_slot->next = head;
-    if(count) (*count)++;
-    return ADD;
+    new_slot->next = NULL;
+    Slot *p = head;
+    while(p) {
+        if(p->next)
+            p = p->next;
+        else {
+            p->next = new_slot;
+            break;
+        }
+    }
 }
 
 static void rehash(HashMap *m, int new_size){
@@ -74,7 +101,7 @@ static void rehash(HashMap *m, int new_size){
         Slot *p = m->slots[i];
         Slot *tmp = NULL;
         while(p){
-            _add_hash(m, new_slots, new_size, NULL, p->key, p->value);
+            _move_slot(m, new_slots, new_size, p->key, p->value);
             tmp = p;
             p = p->next;
             free(tmp);
@@ -89,7 +116,7 @@ int add_hash(HashMap *m, void *key, void *value){
     if(m->count >= m->slots_size && m->slots_size <= INT_MAX/2){
         rehash(m, m->slots_size * 2);
     }
-    return _add_hash(m, m->slots, m->slots_size, &m->count, key, value);
+    return _add_slot(m, m->slots, m->slots_size, key, value);
 }
 
 void *query_hash(HashMap *m, void *key){
@@ -150,6 +177,12 @@ void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra){
 	}
 }
 
+void get_stats(HashMap *m, Stats *stats) {
+    stats->count = m->count;
+    stats->slots_size = m->slots_size;
+    stats->load_factor = ((double)m->count) / m->slots_size;
+}
+
 void dump_hashmap(HashMap *m){
     printf("slots_size:%d\n", m->slots_size);
     printf("count:%d\n", m->count);
@@ -174,6 +207,18 @@ int compare_cb(const void *key1, const void *key2) {
     return *((uint64_t *)key1) == *((uint64_t *)key2);
 }
 
+void *copy_key_cb(const void *key) {
+    uint64_t *new_key = malloc(sizeof(uint64_t));
+    *new_key = *((uint64_t *)key);
+    return (void *)new_key;
+}
+
+void *copy_val_cb(const void *val) {
+    int *new_val = malloc(sizeof(int));
+    *new_val = *((int *)val);
+    return (void *)new_val;
+}
+
 void free_key_cb(void *key) {
     free(key);
 }
@@ -183,30 +228,30 @@ void free_val_cb(void *val) {
 }
 
 MapType int_key_hash_type = {
-    hash_cb,   //hash_function
+    hash_cb,       //hash_function
     compare_cb,    //key_cmp
+    copy_key_cb,   //copy_key
+    copy_val_cb,   //copy_val
     free_key_cb,   //key_destructor
     free_val_cb,   //val_destructor
 };
-
-static char flag = 1;
 
 void main(){
     HashMap *m = new_hashmap(&int_key_hash_type);   
     srand((unsigned int)time(NULL));
     int num1 = rand() % 1000;
-    for(int i=0;i<num1;i++) {
-        uint64_t *p1 = malloc(sizeof(uint64_t));
-        *p1 = i;
-        int *p2 = malloc(sizeof(int));
-        *p2 = 1;
-        if(add_hash(m, (void *)p1, (void *)p2) == REPLACE)
-            free(p1);
+    for(uint64_t i=0;i<num1;i++) {
+        int p2 = 1;
+        add_hash(m, (void *)&i, (void *)&p2);
     }
     dump_hashmap(m);
+    Stats stats;
+    get_stats(m, &stats);
+    printf("count:%d,slots_size:%d,load_factor:%lf\n", stats.count, stats.slots_size, stats.load_factor);
     int num2 = rand() % 100;
-    for(int i=0;i<num2;i++)
+    for(uint64_t i=0;i<num2;i++)
         remove_hash(m, (void *)&i);
     dump_hashmap(m);
+    printf("count:%d,slots_size:%d,load_factor:%lf\n", stats.count, stats.slots_size, stats.load_factor);
     free_hashmap(m);
 }
