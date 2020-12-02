@@ -79,5 +79,6 @@ int remove_hash(HashMap *m, void *key);
 void *query_hash(HashMap *m, void *key);
 void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra);
 void get_stats(HashMap *m, Stats *stats);
+uint64_t bkdr_hash(const void *key);
 
 #endif
