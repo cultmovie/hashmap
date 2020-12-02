@@ -210,9 +210,9 @@ static void dump_hashmap(HashMap *m, int key_type){
         printf("slot idx:%d\n", i);
         while(p){
             if(key_type == 1)
-                printf("------key:%ld\n", *((uint64_t *)p->key));
+                printf("------key:%ld,value:%d\n", *((uint64_t *)p->key), *((int *)p->value));
             else
-                printf("------key:%s\n", (char *)p->key);
+                printf("------key:%s,value:%d\n", (char *)p->key, *((int *)p->value));
             p = p->next;
         }
     }
@@ -353,7 +353,11 @@ void test_str_key() {
         else
             printf("too long line\n");
     }
-    //dump_hashmap(m, 0);
+    char new_str[] = "hanging";
+    int new_val = 10;
+    add_hashmap(m, (void *)new_str, (void *)&new_val);
+    remove_hashmap(m, (void *)"Toby:");
+    dump_hashmap(m, 0);
     fclose(f);
     print_chains_len(m);
     Stats stats;
