@@ -70,13 +70,13 @@ typedef struct {
     double load_factor;
 } Stats;
 
-typedef void(*traverse_hook)(void *key, void *value, void *extra);
+typedef void(*traverse_hook)(const void *key, void *value, void *extra);
 
 HashMap *new_hashmap(MapType *type);
 void free_hashmap(HashMap *m);
 int add_hashmap(HashMap *m, void *key, void *value);
-int remove_hashmap(HashMap *m, void *key);
-void *query_hashmap(HashMap *m, void *key);
+int remove_hashmap(HashMap *m, const void *key);
+void *query_hashmap(HashMap *m, const void *key);
 void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra);
 void get_hashmap_stats(HashMap *m, Stats *stats);
 uint64_t bkdrhash_hashmap(const void *key);

@@ -48,7 +48,7 @@ int add_hashmap(HashMap *m, void *key, void *value){
     return _add_slot(m, m->slots, m->slots_size, key, value);
 }
 
-void *query_hashmap(HashMap *m, void *key){
+void *query_hashmap(HashMap *m, const void *key){
     uint64_t hash_key = gen_hash_key(m, key);
     int h = HASH(hash_key, m->slots_size);
     Slot *p = m->slots[h];
@@ -60,7 +60,7 @@ void *query_hashmap(HashMap *m, void *key){
     return NULL;
 }
 
-int remove_hashmap(HashMap *m, void *key){
+int remove_hashmap(HashMap *m, const void *key){
     uint64_t hash_key = gen_hash_key(m, key);
     int h = HASH(hash_key, m->slots_size);
     Slot *p = m->slots[h];
