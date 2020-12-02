@@ -12,7 +12,6 @@
 static int _add_slot(HashMap *m, Slot **slots, int slot_size, void *key, void *value);
 static void _move_slot(HashMap *m, Slot **slots, int slot_size, void *key, void *value);
 static void rehash(HashMap *m, int new_size);
-static void dump_hashmap(HashMap *m, int key_type);
 
 HashMap *new_hashmap(MapType *type){
     HashMap *m = (HashMap *)malloc(sizeof(HashMap));
