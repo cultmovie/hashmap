@@ -41,14 +41,14 @@ void free_hashmap(HashMap *m){
     free(m);
 }
 
-int add_hash(HashMap *m, void *key, void *value){
+int add_hashmap(HashMap *m, void *key, void *value){
     if(m->count >= m->slots_size && m->slots_size <= INT_MAX/2){
         rehash(m, m->slots_size * 2);
     }
     return _add_slot(m, m->slots, m->slots_size, key, value);
 }
 
-void *query_hash(HashMap *m, void *key){
+void *query_hashmap(HashMap *m, void *key){
     uint64_t hash_key = gen_hash_key(m, key);
     int h = HASH(hash_key, m->slots_size);
     Slot *p = m->slots[h];
@@ -60,7 +60,7 @@ void *query_hash(HashMap *m, void *key){
     return NULL;
 }
 
-int remove_hash(HashMap *m, void *key){
+int remove_hashmap(HashMap *m, void *key){
     uint64_t hash_key = gen_hash_key(m, key);
     int h = HASH(hash_key, m->slots_size);
     Slot *p = m->slots[h];
@@ -106,13 +106,13 @@ void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra){
 	}
 }
 
-void get_stats(HashMap *m, Stats *stats) {
+void get_hashmap_stats(HashMap *m, Stats *stats) {
     stats->count = m->count;
     stats->slots_size = m->slots_size;
     stats->load_factor = ((double)m->count) / m->slots_size;
 }
 
-uint64_t bkdr_hash(const void *key) {
+uint64_t bkdrhash_hashmap(const void *key) {
     uint64_t seed = 31;
     uint64_t hash = 0;
     char *skey = (char *)key;
@@ -302,7 +302,7 @@ void free_str_val_cb(void *val) {
 }
 
 MapType str_key_hash_type = {
-    bkdr_hash,         //hash_function
+    bkdrhash_hashmap,  //hash_function
     compare_str_cb,    //key_cmp
     copy_str_key_cb,   //copy_key
     copy_str_val_cb,   //copy_val
@@ -315,15 +315,15 @@ void test_int_key() {
     int num1 = rand() % 100000;
     for(uint64_t i=0;i<num1;i++) {
         int p2 = 1;
-        add_hash(m, (void *)&i, (void *)&p2);
+        add_hashmap(m, (void *)&i, (void *)&p2);
     }
     dump_hashmap(m, 1);
     Stats stats;
-    get_stats(m, &stats);
+    get_hashmap_stats(m, &stats);
     printf("count:%d,slots_size:%d,load_factor:%lf\n", stats.count, stats.slots_size, stats.load_factor);
     int num2 = rand() % 100;
     for(uint64_t i=0;i<num2;i++)
-        remove_hash(m, (void *)&i);
+        remove_hashmap(m, (void *)&i);
     dump_hashmap(m, 1);
     printf("count:%d,slots_size:%d,load_factor:%lf\n", stats.count, stats.slots_size, stats.load_factor);
     free_hashmap(m);
@@ -348,7 +348,7 @@ void test_str_key() {
         if(buffer[len - 1] == '\n') {
             int val = 1;
             buffer[len - 1] = '\0';
-            add_hash(m, (void *)buffer, (void *)&val);
+            add_hashmap(m, (void *)buffer, (void *)&val);
         }
         else
             printf("too long line\n");
@@ -357,7 +357,7 @@ void test_str_key() {
     fclose(f);
     print_chains_len(m);
     Stats stats;
-    get_stats(m, &stats);
+    get_hashmap_stats(m, &stats);
     printf("count:%d,slots_size:%d,load_factor:%lf\n", stats.count, stats.slots_size, stats.load_factor);
 }
 

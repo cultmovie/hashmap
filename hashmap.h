@@ -74,11 +74,11 @@ typedef void(*traverse_hook)(void *key, void *value, void *extra);
 
 HashMap *new_hashmap(MapType *type);
 void free_hashmap(HashMap *m);
-int add_hash(HashMap *m, void *key, void *value);
-int remove_hash(HashMap *m, void *key);
-void *query_hash(HashMap *m, void *key);
+int add_hashmap(HashMap *m, void *key, void *value);
+int remove_hashmap(HashMap *m, void *key);
+void *query_hashmap(HashMap *m, void *key);
 void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra);
-void get_stats(HashMap *m, Stats *stats);
-uint64_t bkdr_hash(const void *key);
+void get_hashmap_stats(HashMap *m, Stats *stats);
+uint64_t bkdrhash_hashmap(const void *key);
 
 #endif
