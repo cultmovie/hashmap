@@ -5,7 +5,7 @@
 
 #define INIT_SIZE 2
 #define cast(t, exp)    ((t)(exp))
-#define HASH(key, slots_size) (cast(int, (key) & ((slots_size) - 1)))
+#define HASH(key, slots_size) (cast(int, ((key) % (((slots_size) - 1) | 1))))
 
 #define FAILED 0
 #define SUCC 1
@@ -78,6 +78,7 @@ int add_hashmap(HashMap *m, void *key, void *value);
 int remove_hashmap(HashMap *m, const void *key);
 void *query_hashmap(HashMap *m, const void *key);
 void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra);
+int is_empty_hashmap(HashMap *m);
 void get_hashmap_stats(HashMap *m, Stats *stats);
 uint64_t bkdrhash_hashmap(const void *key);
 

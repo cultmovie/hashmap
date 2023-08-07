@@ -106,6 +106,10 @@ void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra){
 	}
 }
 
+int is_empty_hashmap(HashMap *m) {
+    return m->count <= 0;
+}
+
 void get_hashmap_stats(HashMap *m, Stats *stats) {
     stats->count = m->count;
     stats->slots_size = m->slots_size;
