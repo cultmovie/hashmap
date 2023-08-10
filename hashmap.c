@@ -125,6 +125,41 @@ uint64_t bkdrhash_hashmap(const void *key) {
     return hash & 0x7FFFFFFFFFFFFFFF;
 }
 
+void
+intersect_hashmap(HashMap *m1, HashMap *m2, HashMap *m3) {
+    for(int i = 0;i < m1->slots_size;i++){
+		Slot *p = m1->slots[i];
+		if(p == NULL)
+			continue;
+		while(p){
+            if(query_hashmap(m2, p->key)) {
+                add_hashmap(m3, p->key, p->value);
+            }
+			p = p->next;
+		}
+	}
+}
+
+void
+dump_hashmap(HashMap *m, int key_type){
+    printf("slots_size:%d\n", m->slots_size);
+    printf("count:%d\n", m->count);
+    for(int i = 0;i < m->slots_size;i++){
+        Slot *p = m->slots[i];
+        if(p == NULL)
+            continue;
+        printf("slot idx:%d\n", i);
+        while(p){
+            if(key_type == 1)
+                printf("------key:%ld,value:%d\n", *((uint64_t *)p->key), *((int *)p->value));
+            else
+                printf("------key:%s,value:%d\n", (char *)p->key, *((int *)p->value));
+            p = p->next;
+        }
+    }
+    printf("\n");
+}
+
 /* private function */
 static int _add_slot(HashMap *m, Slot **slots, int slot_size, void *key, void *value) {
     uint64_t hash_key = gen_hash_key(m, key);
@@ -203,25 +238,6 @@ static void rehash(HashMap *m, int new_size){
 }
 
 #ifdef TEST_MAIN
-
-static void dump_hashmap(HashMap *m, int key_type){
-    printf("slots_size:%d\n", m->slots_size);
-    printf("count:%d\n", m->count);
-    for(int i = 0;i < m->slots_size;i++){
-        Slot *p = m->slots[i];
-        if(p == NULL)
-            continue;
-        printf("slot idx:%d\n", i);
-        while(p){
-            if(key_type == 1)
-                printf("------key:%ld,value:%d\n", *((uint64_t *)p->key), *((int *)p->value));
-            else
-                printf("------key:%s,value:%d\n", (char *)p->key, *((int *)p->value));
-            p = p->next;
-        }
-    }
-    printf("\n");
-}
 
 static void print_chains_len(HashMap *m) {
     for(int i = 0;i < m->slots_size;i++){
