@@ -126,14 +126,14 @@ uint64_t bkdrhash_hashmap(const void *key) {
 }
 
 void
-intersect_hashmap(HashMap *m1, HashMap *m2, HashMap *m3) {
+intersect_hashmap(HashMap *m1, HashMap *m2, intersect_hook hook, void *extra) {
     for(int i = 0;i < m1->slots_size;i++){
 		Slot *p = m1->slots[i];
 		if(p == NULL)
 			continue;
 		while(p){
             if(query_hashmap(m2, p->key)) {
-                add_hashmap(m3, p->key, p->value);
+                hook(p->key, p->value, extra);
             }
 			p = p->next;
 		}

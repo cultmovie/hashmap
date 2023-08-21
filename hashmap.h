@@ -71,6 +71,7 @@ typedef struct {
 } Stats;
 
 typedef void(*traverse_hook)(const void *key, void *value, void *extra);
+typedef void(*intersect_hook)(void *key, void *value, void *extra);
 
 HashMap *new_hashmap(MapType *type);
 void free_hashmap(HashMap *m);
@@ -81,7 +82,7 @@ void traverse_hashmap(HashMap *m, traverse_hook hook, void *extra);
 int is_empty_hashmap(HashMap *m);
 void get_hashmap_stats(HashMap *m, Stats *stats);
 uint64_t bkdrhash_hashmap(const void *key);
-void intersect_hashmap(HashMap *m1, HashMap *m2, HashMap *m3);
+void intersect_hashmap(HashMap *m1, HashMap *m2, intersect_hook hook, void *extra);
 void dump_hashmap(HashMap *m, int key_type);
 
 #endif
