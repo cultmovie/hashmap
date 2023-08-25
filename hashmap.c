@@ -141,6 +141,29 @@ intersect_hashmap(HashMap *m1, HashMap *m2, intersect_hook hook, void *extra) {
 }
 
 void
+union_hashmap(HashMap *m1, HashMap *m2, HashMap *union_m) {
+    for(int i = 0;i < m1->slots_size;i++){
+		Slot *p = m1->slots[i];
+		if(p == NULL)
+			continue;
+		while(p){
+            add_hashmap(union_m, p->key, p->value);
+			p = p->next;
+		}
+	}
+    for(int i = 0;i < m2->slots_size;i++){
+		Slot *p = m2->slots[i];
+		if(p == NULL)
+			continue;
+		while(p){
+            if(query_hashmap(union_m, p->key) == NULL)
+                add_hashmap(union_m, p->key, p->value);
+			p = p->next;
+		}
+	}
+}
+
+void
 dump_hashmap(HashMap *m, int key_type){
     printf("slots_size:%d\n", m->slots_size);
     printf("count:%d\n", m->count);
@@ -153,7 +176,7 @@ dump_hashmap(HashMap *m, int key_type){
             if(key_type == 1)
                 printf("------key:%ld,value:%d\n", *((uint64_t *)p->key), *((int *)p->value));
             else
-                printf("------key:%s,value:%d\n", (char *)p->key, *((int *)p->value));
+                printf("------key:%ld,value:%u\n", *(uint64_t *)p->key, *((uint8_t *)p->value));
             p = p->next;
         }
     }
