@@ -84,5 +84,6 @@ void get_hashmap_stats(HashMap *m, Stats *stats);
 uint64_t bkdrhash_hashmap(const void *key);
 void intersect_hashmap(HashMap *m1, HashMap *m2, intersect_hook hook, void *extra);
 void dump_hashmap(HashMap *m, int key_type);
+void union_hashmap(HashMap *m1, HashMap *m2, HashMap *union_m);
 
 #endif
