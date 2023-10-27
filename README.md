@@ -1,3 +1,3 @@
-动态伸缩的哈希表
+c语言通用哈希表
 
-gcc -DTEST_MAIN hashmap.c
+可以简单实现多层嵌套哈希表
